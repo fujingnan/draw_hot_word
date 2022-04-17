@@ -69,6 +69,7 @@ for symbol, item in tqdm(current_res.items()):
             for date in datas.day.unique():
                 if not str(date) in word_count_map[w]:
                     word_count_map[w][str(date)] = 0
+            word_count_map[w] = OrderedDict(sorted(word_count_map[w].items(), key=lambda x:x[0], reverse=True))
 
 
         if symbol in history_res:
