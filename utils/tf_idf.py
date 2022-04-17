@@ -1,29 +1,32 @@
 from collections import Counter, OrderedDict
 import math
-import jieba
+from LAC import LAC
+import os
+from TextRank4ZH.textrank4zh import *
+import warnings
+warnings.filterwarnings("ignore")
+lac = LAC(mode='lac')
 
 
-# class Init_Jieba:
-#     def __init__(self, cut_ignore):
-#         self.cut_ignore = cut_ignore
-#         for word in self.cut_ignore:
-#             jieba.add_word(word)
+
 
 class TF_IDF:
-    def __init__(self, cut_ignore, tag_filter):
+    def __init__(self, tag_filter, user_dict='', is_lower=True, print_num=20, word_min_len=2, window=2):
         self.tag_filter = tag_filter
-        # Init_Jieba(cut_ignore)
-        self.cut_ignore = cut_ignore
+        self.user_dict = user_dict
+        if os.path.join(self.user_dict):
+            lac.load_customization(self.user_dict)
+        self.tr4w = TextRank4Keyword(allow_speech_tags=self.tag_filter, user_dict=user_dict)
+        self.is_lower = is_lower
+        self.print_num = print_num
+        self.word_min_len = word_min_len
+        self.window = window
 
     def text_cut(self, texts):
-        # for word in self.cut_ignore:
-        #     jieba.add_word(word)
-        # jieba.add_word('远海')
         text_stack = []
         for text in texts:
-            cut_res = jieba.cut(text)
-            # cut_res = [x.word for x in cut_res if x.flag in self.tag_filter]
-            cut_res = [x for x in cut_res]
+            cut_res = lac.run(text)
+            cut_res = [cut_res[0][i] for i in range(len(cut_res[1])) if cut_res[1][i] in self.tag_filter and len(cut_res[0][i]) >= 2]
             text_stack.append(cut_res)
         return text_stack
 
@@ -51,24 +54,29 @@ class TF_IDF:
     def word_clean(self, texts):
         text_set = self.text_cut(texts)
         count_list = []
-        tfidf_res = []
-        word_tfidf_map = {}
+        tf_idf = {}
         for c in text_set:
             count_list.append(self.stem_count(c))
         for i in range(len(count_list)):
-            tf_idf = {}
+            tempwords = []
+            tempweights = []
             for word in count_list[i]:
-                if not word in set(self.cut_ignore):
+                if not word:
                     continue
-                tf_idf[word] = self.tfidf(word, count_list[i], count_list)
-            tfidf_res.append(tf_idf)
-        for res in tfidf_res:
-            for key, value in res.items():
-                word_tfidf_map.setdefault(key, []).append(value)
-        sorts = {}
-        for w in self.cut_ignore:
-            sorts[w] = max(word_tfidf_map[w])
-        return OrderedDict(sorted(sorts, key=lambda x: x[1], reverse=True))
+                tempwords.append(word)
+                weight = self.tfidf(word, count_list[i], count_list)
+                if weight == 0.:
+                    self.tr4w.analyze(text=texts[i], lower=self.is_lower, window=self.window)
+                    for item in self.tr4w.get_keywords(self.print_num, word_min_len=self.word_min_len):
+                        if not item.word == word:
+                            continue
+                        tempweights.append(item.weight)
+                        break
+                else:
+                    tempweights.append(weight)
+            tf_idf['word'] = tempwords
+            tf_idf['weights'] = tempweights
+        return tf_idf
 
 
 if __name__ == '__main__':

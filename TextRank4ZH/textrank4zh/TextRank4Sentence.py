@@ -17,7 +17,8 @@ class TextRank4Sentence(object):
     
     def __init__(self, stop_words_file = None, 
                  allow_speech_tags = util.allow_speech_tags,
-                 delimiters = util.sentence_delimiters):
+                 delimiters = util.sentence_delimiters,
+                 user_dict = '../../datas/custom.dict'):
         """
         Keyword arguments:
         stop_words_file  --  str，停止词文件路径，若不是str则是使用默认停止词文件
@@ -31,7 +32,8 @@ class TextRank4Sentence(object):
         """
         self.seg = Segmentation(stop_words_file=stop_words_file,
                                 allow_speech_tags=allow_speech_tags,
-                                delimiters=delimiters)
+                                delimiters=delimiters,
+                                user_dict=user_dict)
         
         self.sentences = None
         self.words_no_filter = None     # 2维列表

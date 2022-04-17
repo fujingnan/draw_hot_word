@@ -22,8 +22,8 @@ except:
     pass
     
 sentence_delimiters = ['?', '!', ';', '？', '！', '。', '；', '……', '…', '\n']
-allow_speech_tags = ['an', 'i', 'j', 'l', 'n', 'nr', 'nrfg', 'ns', 'nt', 'nz', 't', 'v', 'vd', 'vn', 'eng']
-
+# allow_speech_tags = ['an', 'i', 'j', 'l', 'n', 'nr', 'nrfg', 'ns', 'nt', 'nz', 't', 'v', 'vd', 'vn', 'eng']
+allow_speech_tags = ['n' ,'v', 'vn', 'nz', 'a', 'PER', 'LOC', 'ORG', 'TIME', 'nw']
 PY2 = sys.version_info[0] == 2
 if not PY2:
     # Python 3.x and up
