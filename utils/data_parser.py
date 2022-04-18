@@ -63,6 +63,9 @@ class Parser(KeyItermMining):
         :return: Dict: {
             symbol: {
                 'id': [status_ids],
+                'user_id': [user_ids],
+                '评论数': [counts],
+                'day': [days],
                 'text': [texts]
             },
             ...
@@ -97,7 +100,10 @@ class Parser(KeyItermMining):
                 else:
                     symbol_text_map[symbol].setdefault(content_type, []).append(content)
 
-
+        for symbol in symbol_text_map:
+            reply_count = symbol_text_map[symbol]['评论数']
+            reply_count.sort(reverse=True)
+            symbol_text_map[symbol]['评论数'] = reply_count
         return symbol_text_map
 
     def get_text_info(self, extract_level, texts):
