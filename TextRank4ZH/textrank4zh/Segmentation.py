@@ -6,11 +6,10 @@
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
-import jieba.posseg as pseg
 import codecs
 import os
-
+from LAC import LAC
+lac = LAC(mode='lac')
 from . import util
 
 def get_default_stop_words_file():
@@ -20,7 +19,7 @@ def get_default_stop_words_file():
 class WordSegmentation(object):
     """ 分词 """
     
-    def __init__(self, stop_words_file = None, allow_speech_tags = util.allow_speech_tags):
+    def __init__(self, stop_words_file = None, allow_speech_tags = util.allow_speech_tags, user_dict = None):
         """
         Keyword arguments:
         stop_words_file    -- 保存停止词的文件路径，utf8编码，每行一个停止词。若不是str类型，则使用默认的停止词
@@ -36,6 +35,8 @@ class WordSegmentation(object):
             self.stop_words_file = stop_words_file
         for word in codecs.open(self.stop_words_file, 'r', 'utf-8', 'ignore'):
             self.stop_words.add(word.strip())
+        if os.path.join(user_dict):
+            lac.load_customization(user_dict)
     
     def segment(self, text, lower = True, use_stop_words = True, use_speech_tags_filter = False):
         """对一段文本进行分词，返回list类型的分词结果
@@ -46,16 +47,19 @@ class WordSegmentation(object):
         use_speech_tags_filter -- 是否基于词性进行过滤。若为True，则使用self.default_speech_tag_filter过滤。否则，不过滤。    
         """
         text = util.as_text(text)
-        jieba_result = pseg.cut(text)
-        
+        # jieba_result = pseg.cut(text)
+        jieba_result = lac.run(text)
         if use_speech_tags_filter == True:
-            jieba_result = [w for w in jieba_result if w.flag in self.default_speech_tag_filter]
+            # jieba_result = [w for w in jieba_result if w.flag in self.default_speech_tag_filter]
+            jieba_result = [jieba_result[0][i] for i in range(len(jieba_result[1])) if jieba_result[1][i] in self.default_speech_tag_filter]
         else:
-            jieba_result = [w for w in jieba_result]
+            # jieba_result = [w for w in jieba_result]
+            jieba_result = [jieba_result[0][i] for i in range(len(jieba_result[1]))]
 
         # 去除特殊符号
-        word_list = [w.word.strip() for w in jieba_result if w.flag!='x']
-        word_list = [word for word in word_list if len(word)>0]
+        # word_list = [w.word.strip() for w in jieba_result if w.flag!='x']
+        # word_list = [word for word in word_list if len(word)>0]
+        word_list = [word for word in jieba_result if len(word) > 0]
         
         if lower:
             word_list = [word.lower() for word in word_list]
@@ -106,13 +110,14 @@ class Segmentation(object):
     
     def __init__(self, stop_words_file = None, 
                     allow_speech_tags = util.allow_speech_tags,
-                    delimiters = util.sentence_delimiters):
+                    delimiters = util.sentence_delimiters,
+                    user_dict = None):
         """
         Keyword arguments:
         stop_words_file -- 停止词文件
         delimiters      -- 用来拆分句子的符号集合
         """
-        self.ws = WordSegmentation(stop_words_file=stop_words_file, allow_speech_tags=allow_speech_tags)
+        self.ws = WordSegmentation(stop_words_file=stop_words_file, allow_speech_tags=allow_speech_tags, user_dict=user_dict)
         self.ss = SentenceSegmentation(delimiters=delimiters)
         
     def segment(self, text, lower = False):

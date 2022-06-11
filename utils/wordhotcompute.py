@@ -45,8 +45,8 @@ class HotWordMining:
                 compute_res_for_each_word[w]['rate'] = tp['current_num'] / compute_res_for_each_word[w]['sum']
             num_count += compute_res_for_each_word[w]['sum']
             rate_count += compute_res_for_each_word[w]['rate']
-        num_count_avg = num_count / len(words)
-        rate_count_avg = rate_count / len(words)
+        num_count_avg = num_count / (len(words) + 1)
+        rate_count_avg = rate_count / (len(words) + 1)
         return (word_rate_map, compute_res_for_each_word, num_count_avg, rate_count_avg)
 
     def bayes_func(self, cur_sum, cur_rate, num_avg, rate_avg):
@@ -58,7 +58,7 @@ class HotWordMining:
         :param rate_avg: 所有词总词频率均值
         :return:
         """
-        return (cur_sum * cur_rate + num_avg * rate_avg) / (cur_sum + num_avg)
+        return (cur_sum * cur_rate + num_avg * rate_avg) / (cur_sum + num_avg + 1)
 
     def newton_func(self, cur_num, his_num, time_diff):
         """

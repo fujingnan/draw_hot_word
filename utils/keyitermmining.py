@@ -1,20 +1,17 @@
 from tqdm import tqdm
 from TextRank4ZH.textrank4zh import *
+from utils.tf_idf import TF_IDF
 import warnings
 warnings.filterwarnings("ignore")
 
 
-class KeyItermMining():
-    def __init__(self, is_lower=True,
-                 window=2,
-                 print_num=20,
-                 word_min_len=2,
-                 min_phrase_len=2,
-                 topic_num=3,
-                 tag_filter=util.allow_speech_tags):
+class KeyItermMining(TF_IDF):
+    def __init__(self, is_lower=True, window=2, print_num=20, word_min_len=2, min_phrase_len=2, topic_num=3,
+                 tag_filter=util.allow_speech_tags, user_dict=''):
+        super().__init__(tag_filter=tag_filter, user_dict=user_dict, is_lower=True, print_num=20, word_min_len=2, window=2)
         self.tag_filter = tag_filter
-        self.tr4s = TextRank4Sentence(stop_words_file='../TextRank4ZH/textrank4zh/stopwords.txt', allow_speech_tags=self.tag_filter)
-        self.tr4w = TextRank4Keyword(stop_words_file='../TextRank4ZH/textrank4zh/stopwords.txt', allow_speech_tags=self.tag_filter)
+        self.tr4s = TextRank4Sentence(allow_speech_tags=self.tag_filter, user_dict=user_dict)
+        self.tr4w = TextRank4Keyword(allow_speech_tags=self.tag_filter, user_dict=user_dict)
         self.is_lower = is_lower
         self.window = window
         self.print_num = print_num
@@ -72,7 +69,7 @@ class KeyItermMining():
             print(print('Error! No text found! At least one text input!'))
         results = {'topics': {}}
         # print('摘要提取……')
-        for text in tqdm(texts):
+        for text in texts:
             self.tr4s.analyze(text=text, lower=self.is_lower, source='all_filters')
             tmpindex, tmpweight, tmpsentence = [], [], []
             for item in self.tr4s.get_key_sentences(num=self.topic_num):
@@ -106,6 +103,9 @@ class KeyItermMining():
         keywords_process.update(keySentence)
         alls = keywords_process
         return alls
+
+    def tf_idf(self, texts):
+        return self.word_clean(texts)
 
 
 if __name__ == '__main__':
