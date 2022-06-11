@@ -1,2 +1,4 @@
-./cache/*
-./results/*
+cache/
+results/
+datas/
+csv/
