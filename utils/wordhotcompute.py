@@ -1,3 +1,9 @@
+"""
+author: fujingnan
+tel: 18813102099
+date: 2022-04-18
+功能：热词挖掘
+"""
 from ahocorapy.keywordtree import KeywordTree
 from math import *
 from collections import OrderedDict
