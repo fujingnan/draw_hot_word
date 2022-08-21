@@ -1,6 +1,7 @@
 """
 author: fujingnan
-tel: 18813102099
+email: 291217208@qq.com
+wechart: x-music7208
 date: 2022-04-18
 功能：热词挖掘
 """
